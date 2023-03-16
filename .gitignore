@@ -1,0 +1,6 @@
+db_fences/*.gpkg
+*.xlsx
+*.ppt
+*.qgz
+datos.csv
+instrucciones.txt

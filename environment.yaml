@@ -1,0 +1,14 @@
+name: actiontracker
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - geopandas
+  - numpy
+  - pandas
+  - shapely
+  - Flask
+  - openpyxl
+  - fiona
+  - pyogrio
+  - sqlalchemy

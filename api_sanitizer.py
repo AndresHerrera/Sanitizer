@@ -15,8 +15,9 @@ app = Flask(__name__)
 geodataterrain = gpd.read_file("db_fences/gadm_410.gpkg", layer="gadm_410")
 geodataoceans = gpd.read_file("db_fences/eez_v11.gpkg", layer="eez_v11")
 
+password='remplaceporpasswordaca'
 # Connect to PostGIS database using sqlalchemy
-engine = create_engine('postgresql://postgres:t763rm3n@localhost:5432/actiontracker', pool_size=20, max_overflow=30)
+engine = create_engine('postgresql://dev_crud_user:'+password+'@dev01.actiontracker.es:5432/ActionTracker', pool_size=20, max_overflow=30)
 
 # Open a connection to the database
 #with engine.connect() as conn:
@@ -40,10 +41,11 @@ def get_coords():
     #print(gdfocean)
     
     # Define SQL query to get data from PostGIS layer
-    query = "SELECT * FROM custom_geofences WHERE ST_Intersects(geom, ST_GeomFromText('{}', 4326))".format(point.wkt)
+    query =  "SELECT * FROM public.geosanitizadora WHERE ST_Intersects(\"geomUbicacion\", ST_GeomFromText('{}', 4326))".format(point.wkt)
+    #
         
     # Read data into geopandas dataframe
-    gdfpostgis = gpd.read_postgis(sql=sql_text(query), con=engine.connect(), geom_col='geom')
+    gdfpostgis = gpd.read_postgis(sql=sql_text(query), con=engine.connect(), geom_col='geomUbicacion')
     #print(gdfpostgis)
 
     response={'latitude': lat, 'longitude': lon}
@@ -63,10 +65,16 @@ def get_coords():
         oceant1= geodataoceans.loc[ocean_index, "TERRITORY1"]
         response = {'oceant1': oceant1,'latitude': lat, 'longitude': lon}
 
-    if gdfpostgis['name'].all() > 0:
-        fence_index = gdfpostgis[gdfpostgis == True].index[0]
-        namefence= gdfpostgis.loc[fence_index, "name"]
-        response = {'geofence': namefence,'latitude': lat, 'longitude': lon}
+    if gdfpostgis['idUbicacion'].all() > 0:
+        if gdfpostgis[gdfpostgis == True].size > 0:
+            fence_index = gdfpostgis[gdfpostgis == True].index[0]
+            idUbicacion= gdfpostgis.loc[fence_index, "idUbicacion"]
+            idUbicacionPadre= gdfpostgis.loc[fence_index, "idUbicacionPadre"]
+            nomUbicacion= gdfpostgis.loc[fence_index, "nomUbicacion"]
+            idEmpresa= gdfpostgis.loc[fence_index, "idEmpresa"]
+            habilitado= gdfpostgis.loc[fence_index, "habilitado"]
+            indSanitizador= gdfpostgis.loc[fence_index, "indSanitizador"]
+            response = {'idUbicacion': idUbicacion,'idUbicacionPadre': idUbicacionPadre,'nomUbicacion': nomUbicacion,'idEmpresa': idEmpresa,'habilitado': habilitado,'indSanitizador': indSanitizador,'latitude': lat, 'longitude': lon}
 
     return jsonify(response)
 
